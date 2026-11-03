@@ -37,6 +37,15 @@ jobs:
           test ${PIPESTATUS[0]} -eq 0
           cp app/build/outputs/apk/debug/app-debug.apk PartyGames.apk
 
+      - name: Verificar APK
+        shell: bash
+        run: |
+          BT=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)
+          echo "build-tools: $BT"
+          "$BT/apksigner" verify --verbose --print-certs PartyGames.apk
+          "$BT/aapt2" dump badging PartyGames.apk | head -20
+          "$BT/zipalign" -c -v -p 4 PartyGames.apk | tail -3
+
       - name: Guardar errores de compilación
         if: failure()
         run: |
