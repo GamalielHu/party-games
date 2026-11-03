@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Antifaz -->
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M30,46 C30,40 38,38 54,42 C70,38 78,40 78,46 C78,56 72,62 64,62 C59,62 56,58 54,56 C52,58 49,62 44,62 C36,62 30,56 30,46 Z" />
+    <path android:fillColor="#FF6D28D9"
+        android:pathData="M37,49 C37,46 41,45 47,47 C47,52 45,55 42,55 C39,55 37,52 37,49 Z" />
+    <path android:fillColor="#FF6D28D9"
+        android:pathData="M71,49 C71,46 67,45 61,47 C61,52 63,55 66,55 C69,55 71,52 71,49 Z" />
+    <!-- Puntos de fiesta -->
+    <path android:fillColor="#FFFACC15" android:pathData="M54,72 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0" />
+    <path android:fillColor="#FFF472B6" android:pathData="M40,72 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+    <path android:fillColor="#FF34D399" android:pathData="M68,72 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+</vector>
