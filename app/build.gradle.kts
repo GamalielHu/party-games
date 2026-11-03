@@ -22,6 +22,9 @@ android {
             storePassword = "partygames"
             keyAlias = "partygames"
             keyPassword = "partygames"
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
         }
     }
 
