@@ -136,6 +136,15 @@ fun HomeScreen(
                     )
                 }
             }
+            if (state.selectedMode == GameMode.CHARADES) {
+                item(key = "charades_settings") {
+                    CharadesSettings(
+                        state = state,
+                        onRounds = viewModel::setCharadesRounds,
+                        onSeconds = viewModel::setCharadesSeconds,
+                    )
+                }
+            }
             item(key = "bottom_space") { Spacer(Modifier.height(16.dp)) }
         }
     }
@@ -316,6 +325,47 @@ private fun ImpostorSettings(
                 }
                 Switch(checked = state.impostorKnowsCategory, onCheckedChange = onHint)
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun CharadesSettings(
+    state: PartyUiState,
+    onRounds: (Int) -> Unit,
+    onSeconds: (Int) -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+    ) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Rondas por equipo", style = MaterialTheme.typography.labelLarge)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PartyUiState.CHARADES_ROUND_OPTIONS.forEach { n ->
+                    FilterChip(
+                        selected = state.charadesRounds == n,
+                        onClick = { onRounds(n) },
+                        label = { Text("$n") },
+                    )
+                }
+            }
+            Text("Tiempo por turno", style = MaterialTheme.typography.labelLarge)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PartyUiState.CHARADES_SECONDS_OPTIONS.forEach { secs ->
+                    FilterChip(
+                        selected = state.charadesSeconds == secs,
+                        onClick = { onSeconds(secs) },
+                        label = { Text("$secs s") },
+                    )
+                }
+            }
+            Text(
+                "Los equipos se arman al azar; puedes rehacerlos antes del primer turno.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

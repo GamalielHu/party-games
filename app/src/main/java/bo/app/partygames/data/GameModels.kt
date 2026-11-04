@@ -19,6 +19,29 @@ enum class GameMode(
             "Descubran quién finge saberla antes de que sea tarde.",
         minPlayers = 3,
     ),
+    TRUTH_OR_DARE(
+        title = "Verdad o Reto",
+        description = "Por turnos, cada jugador elige: responder con la verdad o cumplir un reto. " +
+            "Gana quien cumpla más.",
+        minPlayers = 2,
+    ),
+    CHARADES(
+        title = "Charadas por equipos",
+        description = "Dos equipos. Uno actúa la palabra sin hablar y su equipo adivina antes " +
+            "de que se acabe el tiempo.",
+        minPlayers = 4,
+    ),
+    NEVER_HAVE_I_EVER(
+        title = "Yo nunca nunca",
+        description = "Sale una frase; quien sí lo hizo lo confiesa. Al final se ve quién tiene " +
+            "más historias.",
+        minPlayers = 2,
+    ),
+    MOST_LIKELY(
+        title = "¿Quién es más probable?",
+        description = "Sale una pregunta, todos señalan a la vez y el más señalado se lleva el punto.",
+        minPlayers = 3,
+    ),
 }
 
 enum class Role { CREW, IMPOSTOR }

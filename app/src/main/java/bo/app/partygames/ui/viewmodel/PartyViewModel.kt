@@ -28,6 +28,8 @@ data class PartyUiState(
     val impostorCount: Int = 1,
     val impostorKnowsCategory: Boolean = true,
     val discussionSeconds: Int = DEFAULT_DISCUSSION_SECONDS,
+    val charadesRounds: Int = DEFAULT_CHARADES_ROUNDS,
+    val charadesSeconds: Int = DEFAULT_CHARADES_SECONDS,
     val game: ImpostorGame? = null,
 ) {
     val maxImpostors: Int get() = maxImpostorsFor(players.size)
@@ -44,6 +46,10 @@ data class PartyUiState(
         const val MAX_NAME_LENGTH = 20
         const val DEFAULT_DISCUSSION_SECONDS = 180
         val DISCUSSION_OPTIONS = listOf(60, 120, 180, 300, 0) // 0 = sin límite
+        const val DEFAULT_CHARADES_ROUNDS = 3
+        const val DEFAULT_CHARADES_SECONDS = 60
+        val CHARADES_ROUND_OPTIONS = listOf(1, 2, 3, 5)
+        val CHARADES_SECONDS_OPTIONS = listOf(30, 60, 90, 120)
 
         /** Los impostores siempre deben ser minoría estricta. */
         fun maxImpostorsFor(players: Int): Int = ((players - 1) / 2).coerceAtLeast(1)
@@ -112,6 +118,10 @@ class PartyViewModel(
     fun setImpostorKnowsCategory(value: Boolean) = _state.update { it.copy(impostorKnowsCategory = value) }
 
     fun setDiscussionSeconds(seconds: Int) = _state.update { it.copy(discussionSeconds = seconds.coerceAtLeast(0)) }
+
+    fun setCharadesRounds(rounds: Int) = _state.update { it.copy(charadesRounds = rounds.coerceIn(1, 10)) }
+
+    fun setCharadesSeconds(seconds: Int) = _state.update { it.copy(charadesSeconds = seconds.coerceIn(10, 300)) }
 
     // ---------------------------------------------------------------- Partida
 
