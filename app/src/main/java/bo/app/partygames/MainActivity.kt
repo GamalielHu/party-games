@@ -71,7 +71,11 @@ private fun PartyNavHost() {
             )
         }
         composable(Routes.TRUTH_OR_DARE) {
-            TruthOrDareScreen(players = partyViewModel.state.value.players, onExit = goHome)
+            TruthOrDareScreen(
+                players = partyViewModel.state.value.players,
+                spicy = partyViewModel.state.value.spicy,
+                onExit = goHome,
+            )
         }
         composable(Routes.CHARADES) {
             val s = partyViewModel.state.value
@@ -83,10 +87,18 @@ private fun PartyNavHost() {
             )
         }
         composable(Routes.NEVER) {
-            NeverHaveIEverScreen(players = partyViewModel.state.value.players, onExit = goHome)
+            NeverHaveIEverScreen(
+                players = partyViewModel.state.value.players,
+                spicy = partyViewModel.state.value.spicy,
+                onExit = goHome,
+            )
         }
         composable(Routes.MOST_LIKELY) {
-            MostLikelyScreen(players = partyViewModel.state.value.players, onExit = goHome)
+            MostLikelyScreen(
+                players = partyViewModel.state.value.players,
+                spicy = partyViewModel.state.value.spicy,
+                onExit = goHome,
+            )
         }
         composable(Routes.IMPOSTOR) {
             ImpostorGameScreen(

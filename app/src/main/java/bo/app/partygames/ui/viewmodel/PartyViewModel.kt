@@ -30,6 +30,7 @@ data class PartyUiState(
     val discussionSeconds: Int = DEFAULT_DISCUSSION_SECONDS,
     val charadesRounds: Int = DEFAULT_CHARADES_ROUNDS,
     val charadesSeconds: Int = DEFAULT_CHARADES_SECONDS,
+    val spicy: Boolean = true,
     val game: ImpostorGame? = null,
 ) {
     val maxImpostors: Int get() = maxImpostorsFor(players.size)
@@ -118,6 +119,8 @@ class PartyViewModel(
     fun setImpostorKnowsCategory(value: Boolean) = _state.update { it.copy(impostorKnowsCategory = value) }
 
     fun setDiscussionSeconds(seconds: Int) = _state.update { it.copy(discussionSeconds = seconds.coerceAtLeast(0)) }
+
+    fun setSpicy(value: Boolean) = _state.update { it.copy(spicy = value) }
 
     fun setCharadesRounds(rounds: Int) = _state.update { it.copy(charadesRounds = rounds.coerceIn(1, 10)) }
 

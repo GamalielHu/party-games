@@ -27,10 +27,11 @@ class NeverHaveIEverViewModel : ViewModel() {
     private val _state = MutableStateFlow(NeverHaveIEverState())
     val state: StateFlow<NeverHaveIEverState> = _state.asStateFlow()
 
-    private val deck = Deck(Prompts.neverHaveIEver)
+    private var deck = Deck(Prompts.spicyNeverHaveIEver)
 
-    fun start(players: List<Player>) {
+    fun start(players: List<Player>, spicy: Boolean) {
         if (_state.value.players.isNotEmpty() || players.isEmpty()) return
+        deck = Deck(if (spicy) Prompts.spicyNeverHaveIEver else Prompts.neverHaveIEver)
         _state.value = NeverHaveIEverState(
             players = players,
             prompt = deck.draw(),
@@ -70,10 +71,11 @@ class MostLikelyViewModel : ViewModel() {
     private val _state = MutableStateFlow(MostLikelyState())
     val state: StateFlow<MostLikelyState> = _state.asStateFlow()
 
-    private val deck = Deck(Prompts.mostLikely)
+    private var deck = Deck(Prompts.spicyMostLikely)
 
-    fun start(players: List<Player>) {
+    fun start(players: List<Player>, spicy: Boolean) {
         if (_state.value.players.isNotEmpty() || players.isEmpty()) return
+        deck = Deck(if (spicy) Prompts.spicyMostLikely else Prompts.mostLikely)
         _state.value = MostLikelyState(
             players = players,
             prompt = deck.draw(),

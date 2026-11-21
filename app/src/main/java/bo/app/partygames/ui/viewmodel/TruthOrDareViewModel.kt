@@ -24,6 +24,7 @@ data class TruthOrDareState(
     val turn: Int = 0,
     val phase: TruthOrDarePhase = TruthOrDarePhase.Choose,
     val scores: Map<Long, Int> = emptyMap(),
+    val spicy: Boolean = true,
 ) {
     val currentPlayer: Player? get() = players.getOrNull(turn % players.size.coerceAtLeast(1))
     val round: Int get() = if (players.isEmpty()) 1 else turn / players.size + 1
@@ -34,15 +35,18 @@ class TruthOrDareViewModel : ViewModel() {
     private val _state = MutableStateFlow(TruthOrDareState())
     val state: StateFlow<TruthOrDareState> = _state.asStateFlow()
 
-    private val truths = Deck(Prompts.truths)
-    private val dares = Deck(Prompts.dares)
+    private var truths = Deck(Prompts.spicyTruths)
+    private var dares = Deck(Prompts.spicyDares)
 
     /** Solo inicia una vez por pantalla (sobrevive a rotaciones). */
-    fun start(players: List<Player>) {
+    fun start(players: List<Player>, spicy: Boolean) {
         if (_state.value.players.isNotEmpty() || players.isEmpty()) return
+        truths = Deck(if (spicy) Prompts.spicyTruths else Prompts.truths)
+        dares = Deck(if (spicy) Prompts.spicyDares else Prompts.dares)
         _state.value = TruthOrDareState(
             players = players.shuffled(),
             scores = players.associate { it.id to 0 },
+            spicy = spicy,
         )
     }
 

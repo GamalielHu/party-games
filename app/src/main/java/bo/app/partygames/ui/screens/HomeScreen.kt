@@ -136,6 +136,27 @@ fun HomeScreen(
                     )
                 }
             }
+            if (state.selectedMode in SPICY_MODES) {
+                item(key = "spicy_settings") {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                    ) {
+                        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text("Modo picante +18", style = MaterialTheme.typography.labelLarge)
+                                Text(
+                                    if (state.spicy) "Frases atrevidas, coqueteo y tragos."
+                                    else "Versión suave, apta para todo público.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            Switch(checked = state.spicy, onCheckedChange = viewModel::setSpicy)
+                        }
+                    }
+                }
+            }
             if (state.selectedMode == GameMode.CHARADES) {
                 item(key = "charades_settings") {
                     CharadesSettings(
@@ -149,6 +170,8 @@ fun HomeScreen(
         }
     }
 }
+
+private val SPICY_MODES = setOf(GameMode.TRUTH_OR_DARE, GameMode.NEVER_HAVE_I_EVER, GameMode.MOST_LIKELY)
 
 @Composable
 private fun SectionTitle(title: String, trailing: String? = null) {

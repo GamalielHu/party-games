@@ -45,17 +45,18 @@ import bo.app.partygames.ui.viewmodel.NeverHaveIEverViewModel
 @Composable
 fun NeverHaveIEverScreen(
     players: List<Player>,
+    spicy: Boolean,
     onExit: () -> Unit,
     viewModel: NeverHaveIEverViewModel = viewModel(),
 ) {
-    LaunchedEffect(Unit) { viewModel.start(players) }
+    LaunchedEffect(Unit) { viewModel.start(players, spicy) }
     val state by viewModel.state.collectAsStateWithLifecycle()
     if (state.players.isEmpty()) return
 
     GameScaffold(title = "Yo nunca nunca · #${state.number}", onExit = onExit) {
         PromptCard(state.prompt)
         Text(
-            "¿Quién sí lo hizo? Marca a los que confiesan.",
+            if (spicy) "¿Quién sí lo hizo? Los que confiesan toman un trago." else "¿Quién sí lo hizo? Marca a los que confiesan.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -98,17 +99,18 @@ fun NeverHaveIEverScreen(
 @Composable
 fun MostLikelyScreen(
     players: List<Player>,
+    spicy: Boolean,
     onExit: () -> Unit,
     viewModel: MostLikelyViewModel = viewModel(),
 ) {
-    LaunchedEffect(Unit) { viewModel.start(players) }
+    LaunchedEffect(Unit) { viewModel.start(players, spicy) }
     val state by viewModel.state.collectAsStateWithLifecycle()
     if (state.players.isEmpty()) return
 
     GameScaffold(title = "¿Quién es más probable? · #${state.number}", onExit = onExit) {
         PromptCard(state.prompt)
         Text(
-            "A la cuenta de tres, todos señalan. Elige al más señalado.",
+            if (spicy) "A la cuenta de tres, todos señalan. El más señalado toma un trago." else "A la cuenta de tres, todos señalan. Elige al más señalado.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

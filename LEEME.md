@@ -9,6 +9,7 @@ Juegos de fiesta para un solo teléfono que se pasa de mano en mano. Sin interne
 
 ## Otros modos
 - **Verdad o Reto** (2+): por turnos; verdad vale 1 punto y reto 2. Se puede pedir otra carta.
+- **Modo picante +18** (interruptor en el inicio, activado por defecto): frases atrevidas en Verdad o Reto, Yo nunca nunca y ¿Quién es más probable?.
 - **Charadas por equipos** (4+): dos equipos al azar, rondas y tiempo configurables, botones Adivinaron / Pasar.
 - **Yo nunca nunca** (2+): se marcan los que confiesan; cuenta quién tiene más historias.
 - **¿Quién es más probable?** (3+): todos señalan y el más señalado se lleva el punto.

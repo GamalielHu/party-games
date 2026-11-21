@@ -42,14 +42,15 @@ import bo.app.partygames.ui.viewmodel.TruthOrDareViewModel
 @Composable
 fun TruthOrDareScreen(
     players: List<Player>,
+    spicy: Boolean,
     onExit: () -> Unit,
     viewModel: TruthOrDareViewModel = viewModel(),
 ) {
-    LaunchedEffect(Unit) { viewModel.start(players) }
+    LaunchedEffect(Unit) { viewModel.start(players, spicy) }
     val state by viewModel.state.collectAsStateWithLifecycle()
     val player = state.currentPlayer
 
-    GameScaffold(title = "Verdad o Reto · Ronda ${state.round}", onExit = onExit) {
+    GameScaffold(title = (if (state.spicy) "Verdad o Reto +18" else "Verdad o Reto") + " · Ronda ${state.round}", onExit = onExit) {
         if (player == null) return@GameScaffold
 
         Text("Turno de", style = MaterialTheme.typography.titleMedium)
@@ -64,7 +65,8 @@ fun TruthOrDareScreen(
         when (val phase = state.phase) {
             TruthOrDarePhase.Choose -> {
                 Text(
-                    "¿Verdad (1 punto) o reto (2 puntos)?",
+                    if (state.spicy) "¿Verdad (1 punto) o reto (2 puntos)? Quien se rinde, toma un trago."
+                    else "¿Verdad (1 punto) o reto (2 puntos)?",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
