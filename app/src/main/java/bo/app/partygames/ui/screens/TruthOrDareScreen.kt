@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import bo.app.partygames.data.Audience
 import bo.app.partygames.data.Player
 import bo.app.partygames.ui.components.GameScaffold
 import bo.app.partygames.ui.components.ScoreRow
@@ -42,15 +43,15 @@ import bo.app.partygames.ui.viewmodel.TruthOrDareViewModel
 @Composable
 fun TruthOrDareScreen(
     players: List<Player>,
-    spicy: Boolean,
+    audience: Audience,
     onExit: () -> Unit,
     viewModel: TruthOrDareViewModel = viewModel(),
 ) {
-    LaunchedEffect(Unit) { viewModel.start(players, spicy) }
+    LaunchedEffect(Unit) { viewModel.start(players, audience) }
     val state by viewModel.state.collectAsStateWithLifecycle()
     val player = state.currentPlayer
 
-    GameScaffold(title = (if (state.spicy) "Verdad o Reto +18" else "Verdad o Reto") + " · Ronda ${state.round}", onExit = onExit) {
+    GameScaffold(title = "Verdad o Reto · Ronda ${state.round}", onExit = onExit) {
         if (player == null) return@GameScaffold
 
         Text("Turno de", style = MaterialTheme.typography.titleMedium)
@@ -65,8 +66,8 @@ fun TruthOrDareScreen(
         when (val phase = state.phase) {
             TruthOrDarePhase.Choose -> {
                 Text(
-                    if (state.spicy) "¿Verdad (1 punto) o reto (2 puntos)? Quien se rinde, toma un trago."
-                    else "¿Verdad (1 punto) o reto (2 puntos)?",
+                    "¿Verdad (1 punto) o reto (2 puntos)?" +
+                        (state.audience.penalty?.let { " Quien se rinde, $it." } ?: ""),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

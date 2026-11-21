@@ -88,3 +88,40 @@ data class ImpostorGame(
     val impostorIds: Set<Long> get() = roles.filterValues { it == Role.IMPOSTOR }.keys
     fun isAlive(id: Long): Boolean = id !in eliminatedIds
 }
+
+/** Con quién se juega: cambia qué juegos aparecen y qué frases salen. */
+enum class Audience(
+    val title: String,
+    val description: String,
+    /** Texto de castigo para quien se rinde/confiesa, o null si no hay. */
+    val penalty: String?,
+) {
+    PARTY(
+        title = "Fiesta / grupo",
+        description = "Varios, con coqueteo entre todos, confesiones y tragos. +18",
+        penalty = "toma un trago",
+    ),
+    COUPLE(
+        title = "Pareja",
+        description = "Solo ustedes dos: preguntas íntimas, románticas y retos atrevidos. +18",
+        penalty = "cumple un castigo que elija el otro",
+    ),
+    FRIENDS(
+        title = "Entre amigos / amigas",
+        description = "Chismes, exes, crushes y confesiones, sin retos de coquetear entre ustedes. +18",
+        penalty = "toma un trago",
+    ),
+    FAMILY(
+        title = "Familia / suave",
+        description = "Versión tranquila, apta para todo público.",
+        penalty = null,
+    ),
+}
+
+/** Juegos disponibles según el grupo (en pareja no hay impostor ni equipos). */
+fun GameMode.isAvailableFor(audience: Audience): Boolean =
+    audience != Audience.COUPLE || this != GameMode.IMPOSTOR && this != GameMode.CHARADES
+
+/** Mínimo de jugadores según el grupo: en pareja todo se juega de a dos. */
+fun GameMode.minPlayersFor(audience: Audience): Int =
+    if (audience == Audience.COUPLE) 2 else minPlayers

@@ -73,7 +73,7 @@ private fun PartyNavHost() {
         composable(Routes.TRUTH_OR_DARE) {
             TruthOrDareScreen(
                 players = partyViewModel.state.value.players,
-                spicy = partyViewModel.state.value.spicy,
+                audience = partyViewModel.state.value.effectiveAudience,
                 onExit = goHome,
             )
         }
@@ -89,14 +89,14 @@ private fun PartyNavHost() {
         composable(Routes.NEVER) {
             NeverHaveIEverScreen(
                 players = partyViewModel.state.value.players,
-                spicy = partyViewModel.state.value.spicy,
+                audience = partyViewModel.state.value.effectiveAudience,
                 onExit = goHome,
             )
         }
         composable(Routes.MOST_LIKELY) {
             MostLikelyScreen(
                 players = partyViewModel.state.value.players,
-                spicy = partyViewModel.state.value.spicy,
+                audience = partyViewModel.state.value.effectiveAudience,
                 onExit = goHome,
             )
         }

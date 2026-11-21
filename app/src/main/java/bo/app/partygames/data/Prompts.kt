@@ -1,6 +1,6 @@
 package bo.app.partygames.data
 
-/** Frases locales de cada modo (sin internet). Pensadas para grupos de amigos y familia. */
+/** Frases locales de cada modo (sin internet). Ver [AudiencePrompts] para la selección por grupo. */
 object Prompts {
 
     val truths = listOf(

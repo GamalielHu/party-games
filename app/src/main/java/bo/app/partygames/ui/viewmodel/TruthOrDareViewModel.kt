@@ -2,9 +2,10 @@ package bo.app.partygames.ui.viewmodel
 
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
+import bo.app.partygames.data.Audience
+import bo.app.partygames.data.AudiencePrompts
 import bo.app.partygames.data.Deck
 import bo.app.partygames.data.Player
-import bo.app.partygames.data.Prompts
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +25,7 @@ data class TruthOrDareState(
     val turn: Int = 0,
     val phase: TruthOrDarePhase = TruthOrDarePhase.Choose,
     val scores: Map<Long, Int> = emptyMap(),
-    val spicy: Boolean = true,
+    val audience: Audience = Audience.PARTY,
 ) {
     val currentPlayer: Player? get() = players.getOrNull(turn % players.size.coerceAtLeast(1))
     val round: Int get() = if (players.isEmpty()) 1 else turn / players.size + 1
@@ -35,18 +36,18 @@ class TruthOrDareViewModel : ViewModel() {
     private val _state = MutableStateFlow(TruthOrDareState())
     val state: StateFlow<TruthOrDareState> = _state.asStateFlow()
 
-    private var truths = Deck(Prompts.spicyTruths)
-    private var dares = Deck(Prompts.spicyDares)
+    private var truths = Deck(AudiencePrompts.truths(Audience.PARTY))
+    private var dares = Deck(AudiencePrompts.dares(Audience.PARTY))
 
     /** Solo inicia una vez por pantalla (sobrevive a rotaciones). */
-    fun start(players: List<Player>, spicy: Boolean) {
+    fun start(players: List<Player>, audience: Audience) {
         if (_state.value.players.isNotEmpty() || players.isEmpty()) return
-        truths = Deck(if (spicy) Prompts.spicyTruths else Prompts.truths)
-        dares = Deck(if (spicy) Prompts.spicyDares else Prompts.dares)
+        truths = Deck(AudiencePrompts.truths(audience))
+        dares = Deck(AudiencePrompts.dares(audience))
         _state.value = TruthOrDareState(
             players = players.shuffled(),
             scores = players.associate { it.id to 0 },
-            spicy = spicy,
+            audience = audience,
         )
     }
 

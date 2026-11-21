@@ -1,14 +1,19 @@
 package bo.app.partygames.ui.viewmodel
 
+import android.app.Application
+import android.content.Context
 import androidx.compose.runtime.Immutable
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import bo.app.partygames.data.Audience
 import bo.app.partygames.data.GameMode
 import bo.app.partygames.data.ImpostorGame
 import bo.app.partygames.data.ImpostorPhase
 import bo.app.partygames.data.Player
 import bo.app.partygames.data.Role
 import bo.app.partygames.data.WordBank
+import bo.app.partygames.data.isAvailableFor
+import bo.app.partygames.data.minPlayersFor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +22,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.random.Random
 
 @Immutable
 data class PartyUiState(
@@ -30,12 +34,16 @@ data class PartyUiState(
     val discussionSeconds: Int = DEFAULT_DISCUSSION_SECONDS,
     val charadesRounds: Int = DEFAULT_CHARADES_ROUNDS,
     val charadesSeconds: Int = DEFAULT_CHARADES_SECONDS,
-    val spicy: Boolean = true,
+    /** null = todavía no se eligió (se pregunta al abrir la app). */
+    val audience: Audience? = null,
     val game: ImpostorGame? = null,
 ) {
     val maxImpostors: Int get() = maxImpostorsFor(players.size)
-    val canStart: Boolean get() = players.size >= selectedMode.minPlayers
-    val playersMissing: Int get() = (selectedMode.minPlayers - players.size).coerceAtLeast(0)
+    val effectiveAudience: Audience get() = audience ?: Audience.PARTY
+    val minPlayers: Int get() = selectedMode.minPlayersFor(effectiveAudience)
+    val availableModes: List<GameMode> get() = GameMode.entries.filter { it.isAvailableFor(effectiveAudience) }
+    val canStart: Boolean get() = players.size >= minPlayers
+    val playersMissing: Int get() = (minPlayers - players.size).coerceAtLeast(0)
 
     val alivePlayers: List<Player>
         get() = game?.let { g -> players.filter { g.isAlive(it.id) } } ?: players
@@ -57,11 +65,16 @@ data class PartyUiState(
     }
 }
 
-class PartyViewModel(
-    private val random: Random = Random.Default,
-) : ViewModel() {
+class PartyViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _state = MutableStateFlow(PartyUiState())
+    private val prefs = application.getSharedPreferences("ajustes", Context.MODE_PRIVATE)
+
+    private val _state = MutableStateFlow(
+        PartyUiState(
+            audience = prefs.getString(KEY_AUDIENCE, null)
+                ?.let { name -> Audience.entries.firstOrNull { it.name == name } },
+        ).let { it.copy(selectedMode = it.availableModes.first()) }
+    )
     val state: StateFlow<PartyUiState> = _state.asStateFlow()
 
     private var nextId = 1L
@@ -120,7 +133,15 @@ class PartyViewModel(
 
     fun setDiscussionSeconds(seconds: Int) = _state.update { it.copy(discussionSeconds = seconds.coerceAtLeast(0)) }
 
-    fun setSpicy(value: Boolean) = _state.update { it.copy(spicy = value) }
+    /** Guarda el tipo de grupo y, si el juego elegido no aplica (p. ej. en pareja), cambia a uno que sí. */
+    fun setAudience(audience: Audience) {
+        prefs.edit().putString(KEY_AUDIENCE, audience.name).apply()
+        _state.update { s ->
+            val updated = s.copy(audience = audience)
+            if (s.selectedMode.isAvailableFor(audience)) updated
+            else updated.copy(selectedMode = updated.availableModes.first())
+        }
+    }
 
     fun setCharadesRounds(rounds: Int) = _state.update { it.copy(charadesRounds = rounds.coerceIn(1, 10)) }
 
@@ -133,10 +154,10 @@ class PartyViewModel(
         val s = _state.value
         if (!s.canStart) return false
         stopTimer()
-        val impostors = s.players.shuffled(random).take(s.impostorCount).map { it.id }.toSet()
+        val impostors = s.players.shuffled().take(s.impostorCount).map { it.id }.toSet()
         val roles = s.players.associate { p -> p.id to if (p.id in impostors) Role.IMPOSTOR else Role.CREW }
         val game = ImpostorGame(
-            card = WordBank.randomCard(random, avoid = s.game?.card),
+            card = WordBank.randomCard(avoid = s.game?.card),
             roles = roles,
             eliminatedIds = emptySet(),
             impostorKnowsCategory = s.impostorKnowsCategory,
@@ -169,7 +190,7 @@ class PartyViewModel(
         setPhase(
             ImpostorPhase.Discussion(
                 round = round,
-                starterId = alive.random(random).id,
+                starterId = alive.random().id,
                 secondsLeft = s.discussionSeconds,
                 timerRunning = s.discussionSeconds > 0,
             )
@@ -279,5 +300,9 @@ class PartyViewModel(
     override fun onCleared() {
         stopTimer()
         super.onCleared()
+    }
+
+    private companion object {
+        const val KEY_AUDIENCE = "audiencia"
     }
 }

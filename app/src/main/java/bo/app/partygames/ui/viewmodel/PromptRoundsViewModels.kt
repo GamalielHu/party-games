@@ -2,9 +2,10 @@ package bo.app.partygames.ui.viewmodel
 
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
+import bo.app.partygames.data.Audience
+import bo.app.partygames.data.AudiencePrompts
 import bo.app.partygames.data.Deck
 import bo.app.partygames.data.Player
-import bo.app.partygames.data.Prompts
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,11 +28,11 @@ class NeverHaveIEverViewModel : ViewModel() {
     private val _state = MutableStateFlow(NeverHaveIEverState())
     val state: StateFlow<NeverHaveIEverState> = _state.asStateFlow()
 
-    private var deck = Deck(Prompts.spicyNeverHaveIEver)
+    private var deck = Deck(AudiencePrompts.neverHaveIEver(Audience.PARTY))
 
-    fun start(players: List<Player>, spicy: Boolean) {
+    fun start(players: List<Player>, audience: Audience) {
         if (_state.value.players.isNotEmpty() || players.isEmpty()) return
-        deck = Deck(if (spicy) Prompts.spicyNeverHaveIEver else Prompts.neverHaveIEver)
+        deck = Deck(AudiencePrompts.neverHaveIEver(audience))
         _state.value = NeverHaveIEverState(
             players = players,
             prompt = deck.draw(),
@@ -71,11 +72,11 @@ class MostLikelyViewModel : ViewModel() {
     private val _state = MutableStateFlow(MostLikelyState())
     val state: StateFlow<MostLikelyState> = _state.asStateFlow()
 
-    private var deck = Deck(Prompts.spicyMostLikely)
+    private var deck = Deck(AudiencePrompts.mostLikely(Audience.PARTY))
 
-    fun start(players: List<Player>, spicy: Boolean) {
+    fun start(players: List<Player>, audience: Audience) {
         if (_state.value.players.isNotEmpty() || players.isEmpty()) return
-        deck = Deck(if (spicy) Prompts.spicyMostLikely else Prompts.mostLikely)
+        deck = Deck(AudiencePrompts.mostLikely(audience))
         _state.value = MostLikelyState(
             players = players,
             prompt = deck.draw(),

@@ -45,6 +45,16 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.window.DialogProperties
+import bo.app.partygames.data.Audience
+import bo.app.partygames.data.minPlayersFor
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
@@ -66,6 +76,20 @@ fun HomeScreen(
     onStartGame: (GameMode) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var changeAudience by rememberSaveable { mutableStateOf(false) }
+
+    // La primera vez se pregunta sí o sí; después solo si se toca "Cambiar".
+    if (state.audience == null || changeAudience) {
+        AudienceDialog(
+            current = state.audience,
+            dismissable = state.audience != null,
+            onSelect = {
+                viewModel.setAudience(it)
+                changeAudience = false
+            },
+            onDismiss = { changeAudience = false },
+        )
+    }
 
     Scaffold(
         modifier = Modifier.imePadding(),
@@ -85,6 +109,9 @@ fun HomeScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            item(key = "audience") {
+                AudienceBanner(audience = state.effectiveAudience, onChange = { changeAudience = true })
+            }
             item(key = "players_header") {
                 SectionTitle("Jugadores", "${state.players.size} / ${PartyUiState.MAX_PLAYERS}")
             }
@@ -99,7 +126,7 @@ fun HomeScreen(
             if (state.players.isEmpty()) {
                 item(key = "empty") {
                     Text(
-                        "Agrega al menos ${state.selectedMode.minPlayers} jugadores para empezar.",
+                        "Agrega al menos ${state.minPlayers} jugadores para empezar.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(vertical = 12.dp),
@@ -118,10 +145,11 @@ fun HomeScreen(
                 Spacer(Modifier.height(8.dp))
                 SectionTitle("Modo de juego")
             }
-            items(GameMode.entries.size, key = { "mode_${GameMode.entries[it].name}" }) { i ->
-                val mode = GameMode.entries[i]
+            items(state.availableModes.size, key = { "mode_${state.availableModes[it].name}" }) { i ->
+                val mode = state.availableModes[i]
                 ModeCard(
                     mode = mode,
+                    minPlayers = mode.minPlayersFor(state.effectiveAudience),
                     selected = mode == state.selectedMode,
                     onSelect = { viewModel.selectMode(mode) },
                 )
@@ -134,27 +162,6 @@ fun HomeScreen(
                         onHint = viewModel::setImpostorKnowsCategory,
                         onSeconds = viewModel::setDiscussionSeconds,
                     )
-                }
-            }
-            if (state.selectedMode in SPICY_MODES) {
-                item(key = "spicy_settings") {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                    ) {
-                        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Column(Modifier.weight(1f)) {
-                                Text("Modo picante +18", style = MaterialTheme.typography.labelLarge)
-                                Text(
-                                    if (state.spicy) "Frases atrevidas, coqueteo y tragos."
-                                    else "Versión suave, apta para todo público.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                            Switch(checked = state.spicy, onCheckedChange = viewModel::setSpicy)
-                        }
-                    }
                 }
             }
             if (state.selectedMode == GameMode.CHARADES) {
@@ -171,7 +178,76 @@ fun HomeScreen(
     }
 }
 
-private val SPICY_MODES = setOf(GameMode.TRUTH_OR_DARE, GameMode.NEVER_HAVE_I_EVER, GameMode.MOST_LIKELY)
+@Composable
+private fun AudienceBanner(audience: Audience, onChange: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    "Jugamos en",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                )
+                Text(
+                    audience.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+            }
+            TextButton(onClick = onChange) { Text("Cambiar") }
+        }
+    }
+}
+
+@Composable
+private fun AudienceDialog(
+    current: Audience?,
+    dismissable: Boolean,
+    onSelect: (Audience) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = { if (dismissable) onDismiss() },
+        properties = DialogProperties(dismissOnBackPress = dismissable, dismissOnClickOutside = dismissable),
+        title = { Text("¿Cómo juegan hoy?") },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Audience.entries.forEach { a ->
+                    val selected = a == current
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .selectable(selected = selected, onClick = { onSelect(a) }, role = Role.RadioButton),
+                        border = if (selected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                    ) {
+                        Column(Modifier.padding(12.dp)) {
+                            Text(a.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                            Text(
+                                a.description,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            if (dismissable) TextButton(onClick = onDismiss) { Text("Cancelar") }
+        },
+    )
+}
 
 @Composable
 private fun SectionTitle(title: String, trailing: String? = null) {
@@ -273,7 +349,7 @@ private fun PlayerRow(
 }
 
 @Composable
-private fun ModeCard(mode: GameMode, selected: Boolean, onSelect: () -> Unit) {
+private fun ModeCard(mode: GameMode, minPlayers: Int, selected: Boolean, onSelect: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -292,7 +368,7 @@ private fun ModeCard(mode: GameMode, selected: Boolean, onSelect: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    "Mínimo ${mode.minPlayers} jugadores",
+                    "Mínimo $minPlayers jugadores",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(top = 4.dp),

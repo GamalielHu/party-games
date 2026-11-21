@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import bo.app.partygames.data.Audience
 import bo.app.partygames.data.Player
 import bo.app.partygames.ui.components.GameScaffold
 import bo.app.partygames.ui.viewmodel.MostLikelyViewModel
@@ -45,18 +46,18 @@ import bo.app.partygames.ui.viewmodel.NeverHaveIEverViewModel
 @Composable
 fun NeverHaveIEverScreen(
     players: List<Player>,
-    spicy: Boolean,
+    audience: Audience,
     onExit: () -> Unit,
     viewModel: NeverHaveIEverViewModel = viewModel(),
 ) {
-    LaunchedEffect(Unit) { viewModel.start(players, spicy) }
+    LaunchedEffect(Unit) { viewModel.start(players, audience) }
     val state by viewModel.state.collectAsStateWithLifecycle()
     if (state.players.isEmpty()) return
 
     GameScaffold(title = "Yo nunca nunca · #${state.number}", onExit = onExit) {
         PromptCard(state.prompt)
         Text(
-            if (spicy) "¿Quién sí lo hizo? Los que confiesan toman un trago." else "¿Quién sí lo hizo? Marca a los que confiesan.",
+            "¿Quién sí lo hizo? Marca a los que confiesan." + (audience.penalty?.let { " Los que confiesan: $it." } ?: ""),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -99,18 +100,18 @@ fun NeverHaveIEverScreen(
 @Composable
 fun MostLikelyScreen(
     players: List<Player>,
-    spicy: Boolean,
+    audience: Audience,
     onExit: () -> Unit,
     viewModel: MostLikelyViewModel = viewModel(),
 ) {
-    LaunchedEffect(Unit) { viewModel.start(players, spicy) }
+    LaunchedEffect(Unit) { viewModel.start(players, audience) }
     val state by viewModel.state.collectAsStateWithLifecycle()
     if (state.players.isEmpty()) return
 
     GameScaffold(title = "¿Quién es más probable? · #${state.number}", onExit = onExit) {
         PromptCard(state.prompt)
         Text(
-            if (spicy) "A la cuenta de tres, todos señalan. El más señalado toma un trago." else "A la cuenta de tres, todos señalan. Elige al más señalado.",
+            (if (audience == Audience.COUPLE) "A la cuenta de tres, señalen los dos. Elige quién se lleva el punto." else "A la cuenta de tres, todos señalan. Elige al más señalado.") + (audience.penalty?.let { " El elegido $it." } ?: ""),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
